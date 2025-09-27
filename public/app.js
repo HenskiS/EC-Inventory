@@ -116,9 +116,15 @@ class InventoryApp {
 
     initializeElements() {
         this.searchInput = document.getElementById('search-input');
+        this.barcodeScanBtn = document.getElementById('barcode-scan-btn');
         this.clearSearchBtn = document.getElementById('clear-search-btn');
         this.searchResults = document.getElementById('search-results-list');
         this.cartItems = document.getElementById('cart-items');
+
+        // Barcode scanner elements
+        this.barcodeModal = document.getElementById('barcode-modal');
+        this.barcodeScanner = document.getElementById('barcode-scanner');
+        this.closeBarcodeBtn = document.getElementById('close-barcode-btn');
 
         // Filter elements
         this.brandFilter = document.getElementById('brand-filter');
@@ -146,8 +152,12 @@ class InventoryApp {
         // Search
         this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
         this.searchInput.addEventListener('keydown', (e) => this.handleSearchKeydown(e));
+        this.barcodeScanBtn.addEventListener('click', () => this.startBarcodeScanner());
         this.clearSearchBtn.addEventListener('click', () => this.clearSearch());
         document.addEventListener('click', (e) => this.handleDocumentClick(e));
+
+        // Barcode scanner
+        this.closeBarcodeBtn.addEventListener('click', () => this.stopBarcodeScanner());
 
         // Filters
         this.brandFilter.addEventListener('change', () => this.handleFiltersChange());
@@ -754,6 +764,102 @@ class InventoryApp {
         setTimeout(() => {
             this.notification.classList.remove('show');
         }, 3000);
+    }
+
+    // Barcode Scanner Methods
+    async startBarcodeScanner() {
+        try {
+            // Check if camera is available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                this.showNotification('Camera not available on this device', 'error');
+                return;
+            }
+
+            this.barcodeModal.classList.remove('hidden');
+
+            // Initialize Quagga
+            await new Promise((resolve, reject) => {
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: this.barcodeScanner,
+                        constraints: {
+                            width: 600,
+                            height: 400,
+                            facingMode: "environment" // Use back camera on mobile
+                        }
+                    },
+                    decoder: {
+                        readers: [
+                            "code_128_reader",
+                            "ean_reader",
+                            "ean_8_reader",
+                            "code_39_reader",
+                            "code_39_vin_reader",
+                            "codabar_reader",
+                            "upc_reader",
+                            "upc_e_reader",
+                            "i2of5_reader"
+                        ]
+                    },
+                    locate: true,
+                    locator: {
+                        patchSize: "medium",
+                        halfSample: true
+                    }
+                }, (err) => {
+                    if (err) {
+                        console.error(err);
+                        this.showNotification('Error starting camera: ' + err.message, 'error');
+                        reject(err);
+                        return;
+                    }
+                    console.log("Initialization finished. Ready to start");
+                    Quagga.start();
+                    resolve();
+                });
+            });
+
+            // Set up barcode detection
+            Quagga.onDetected((data) => {
+                console.log("Barcode detected: ", data.codeResult.code);
+                this.handleBarcodeDetected(data.codeResult.code);
+            });
+
+        } catch (error) {
+            console.error('Error starting barcode scanner:', error);
+            this.showNotification('Error starting camera', 'error');
+            this.barcodeModal.classList.add('hidden');
+        }
+    }
+
+    stopBarcodeScanner() {
+        try {
+            Quagga.stop();
+            this.barcodeModal.classList.add('hidden');
+
+            // Clear the scanner div
+            this.barcodeScanner.innerHTML = '';
+        } catch (error) {
+            console.error('Error stopping barcode scanner:', error);
+        }
+    }
+
+    handleBarcodeDetected(barcode) {
+        console.log('Detected barcode:', barcode);
+
+        // Stop the scanner
+        this.stopBarcodeScanner();
+
+        // Search for the barcode
+        this.searchInput.value = barcode;
+        this.clearSearchBtn.classList.remove('hidden');
+
+        // Trigger search
+        this.performSearch();
+
+        this.showNotification(`Scanned: ${barcode}`);
     }
 }
 

@@ -20,6 +20,7 @@
             <div id="search-section" class="section">
                 <div class="search-box">
                     <input type="text" id="search-input" placeholder="Search by brand, name, SKU, or barcode..." autocomplete="off">
+                    <button id="barcode-scan-btn" class="barcode-scan-btn" title="Scan barcode">📷</button>
                     <button id="clear-search-btn" class="clear-search-btn" title="Clear search">✕</button>
                 </div>
                 <div class="search-filters">
@@ -102,8 +103,23 @@
         </main>
     </div>
 
+    <!-- Barcode Scanner Modal -->
+    <div id="barcode-modal" class="barcode-modal hidden">
+        <div class="barcode-modal-content">
+            <div class="barcode-modal-header">
+                <h3>Scan Barcode</h3>
+                <button id="close-barcode-btn" class="close-barcode-btn">✕</button>
+            </div>
+            <div id="barcode-scanner" class="barcode-scanner"></div>
+            <div class="barcode-instructions">
+                Position the barcode within the frame and hold steady
+            </div>
+        </div>
+    </div>
+
     <div id="notification" class="notification hidden"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

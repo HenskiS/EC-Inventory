@@ -57,7 +57,7 @@ header h1 {
 
 #search-input {
     width: 100%;
-    padding: 15px 50px 15px 20px;
+    padding: 15px 90px 15px 20px;
     font-size: 18px;
     border: 2px solid #e2e8f0;
     border-radius: 8px;
@@ -68,6 +68,29 @@ header h1 {
 #search-input:focus {
     border-color: #4299e1;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.barcode-scan-btn {
+    position: absolute;
+    right: 55px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.barcode-scan-btn:hover {
+    background: #3182ce;
 }
 
 .clear-search-btn {
@@ -590,6 +613,100 @@ header h1 {
     background: #e53e3e;
 }
 
+/* Barcode Scanner Modal */
+.barcode-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.barcode-modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.barcode-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.barcode-modal-header h3 {
+    color: #2d3748;
+    font-size: 20px;
+    margin: 0;
+}
+
+.close-barcode-btn {
+    background: #718096;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-barcode-btn:hover {
+    background: #4a5568;
+}
+
+.barcode-scanner {
+    width: 100%;
+    height: 350px;
+    background: #2d3748;
+    position: relative;
+    overflow: hidden;
+}
+
+.barcode-scanner canvas,
+.barcode-scanner video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.barcode-instructions {
+    padding: 20px 25px;
+    text-align: center;
+    color: #718096;
+    font-size: 14px;
+    background: #f7fafc;
+}
+
+/* Barcode scanning overlay */
+.drawingBuffer {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.drawingBuffer canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 /* iPad Optimizations */
 @media (max-width: 1024px) {
     .container {
@@ -598,7 +715,7 @@ header h1 {
 
     #search-input {
         font-size: 20px;
-        padding: 18px 20px;
+        padding: 18px 100px 18px 20px;
     }
 
     .search-result-item {
@@ -619,5 +736,19 @@ header h1 {
         padding: 15px 30px;
         font-size: 18px;
         min-height: 50px;
+    }
+
+    .barcode-scan-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        right: 65px;
+    }
+
+    .clear-search-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        right: 15px;
     }
 }
