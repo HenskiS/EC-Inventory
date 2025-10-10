@@ -115,39 +115,42 @@ class BarcodeScannerApp {
                 });
             });
 
-            // Set up barcode detection with confidence filtering
-            let lastDetectedCode = null;
-            let detectionCount = 0;
-            const REQUIRED_DETECTIONS = 2;
-            const CONFIDENCE_THRESHOLD = 0.5;
+            // Set up barcode detection with vote-based filtering
+            const detectedCodes = {};
+            const VOTE_THRESHOLD = 5; // Need 5 votes for same code
+            const VOTE_WINDOW = 2000; // 2 second window
 
             Quagga.onDetected((data) => {
                 if (!this.isScanning) return;
 
                 const code = data.codeResult.code;
-                const confidence = data.codeResult.confidence || 0;
+                const now = Date.now();
 
-                console.log(`Detected: ${code}, Confidence: ${confidence.toFixed(2)}`);
+                console.log(`Detected: ${code}`);
 
-                // Require minimum confidence
-                if (confidence < CONFIDENCE_THRESHOLD) {
-                    return;
-                }
-
-                // Count consecutive detections of the same code
-                if (code === lastDetectedCode) {
-                    detectionCount++;
+                // Initialize or update vote count for this code
+                if (!detectedCodes[code]) {
+                    detectedCodes[code] = { count: 1, firstSeen: now };
                 } else {
-                    lastDetectedCode = code;
-                    detectionCount = 1;
+                    detectedCodes[code].count++;
                 }
 
-                // Only accept after multiple consistent detections
-                if (detectionCount >= REQUIRED_DETECTIONS) {
-                    console.log(`Confirmed barcode: ${code}`);
+                // Clean up old codes outside the window
+                for (const c in detectedCodes) {
+                    if (now - detectedCodes[c].firstSeen > VOTE_WINDOW) {
+                        delete detectedCodes[c];
+                    }
+                }
+
+                // Check if this code has enough votes
+                if (detectedCodes[code].count >= VOTE_THRESHOLD) {
+                    console.log(`Confirmed barcode: ${code} (${detectedCodes[code].count} detections)`);
                     this.handleBarcodeDetected(code);
-                    lastDetectedCode = null;
-                    detectionCount = 0;
+
+                    // Clear all votes after successful scan
+                    for (const c in detectedCodes) {
+                        delete detectedCodes[c];
+                    }
                 }
             });
 
