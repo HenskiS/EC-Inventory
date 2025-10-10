@@ -1,35 +1,73 @@
-# Cash Discount iPad App Project Summary
+# EC Inventory - Cash Discount & Barcode Scanner App
 
-## **Project Goal:**
-Build a mobile web app for iPad to replace manual cash discount calculations at a cigar store. Staff need to walk around the humidor, search inventory, build carts with automatic 40% cash discounts, and track sales for later inventory reconciliation.
+## **Project Overview:**
+Mobile web app for iPad/desktop to manage cash discount calculations and barcode inventory scanning at a cigar store. Two main features:
+1. **Cash Discount Calculator** - Build orders with automatic 40% discount
+2. **Barcode Scanner** - Walk the humidor and scan products to verify inventory barcodes
 
 ## **Stack:**
-Express for server
-SQLite for server
-Whatever for local
-JS, HTML, and CSS for frontend
+- **Backend:** Express.js + SQLite
+- **Frontend:** Vanilla JavaScript, HTML5, CSS3
+- **Barcode Scanning:** Quagga2 (1D barcode reader)
+
+## **Features:**
+
+### Cash Discount Calculator
+- Real-time inventory search (brand, name, SKU, barcode)
+- Multiple filter options (brand dropdown, SKU, price range)
+- Shopping cart with adjustable discount rate (default 40%)
+- Order persistence with offline support
+- Saved orders management
+- Mobile-optimized interface for iPad
+
+### Barcode Scanner
+- Live camera barcode scanning with Quagga2
+- Auto-lookup in inventory database
+- Manual product search and barcode linking
+- Manual entry for products not in inventory (brand + name/size)
+- Running list of scanned items (found/not found)
+- CSV export with full product data
+- Database persistence (survives page refresh)
+- Clear all functionality
 
 ## **Data Source:**
-Successfully created CSV export with these columns:
+Inventory CSV export with these columns:
 - **Brand_Code** (DAVIDOFF, LAAURORA, etc.)
 - **Brand_Name** (full descriptions from Departments table)
 - **Name** (product description combining ItemName + ItemName_Extra)
 - **SKU** (ItemNum - internal item codes)
-- **Barcode** (UPC codes for potential scanning)
+- **Barcode** (UPC codes for scanning)
 - **Price** (retail price for discount calculation)
 - **Stock** (current inventory levels)
 
-## **App Requirements Confirmed:**
-- Real-time inventory search (brand, name, SKU, barcode)
-- Shopping cart with adjustable discount rate (default 40%)
-- Order completion and local storage
-- Export completed orders for CRE reconciliation
-- Mobile-optimized interface for iPad use in humidor
+## **Database Tables:**
 
-## **SQL for getting CSV:**
-```
+### `inventory`
+Main product database imported from CRE
+- id, brand_code, brand_name, name, sku, barcode, price, stock
+
+### `orders`
+Saved discount calculator orders
+- id, items (JSON), total, cash_total, discount_rate, created_at, completed
+
+### `barcode_scans`
+Persistent barcode scanner data
+- id, barcode, found, inventory_id (FK), manual_brand, manual_name, sku, brand_name, brand_code, price, stock, name, scanned_at
+
+## **Setup:**
+1. Install dependencies: `npm install`
+2. Import inventory CSV: `node import-csv.js path/to/inventory.csv`
+3. Start server: `npm start`
+4. Open browser: `http://localhost:3001`
+
+## **Usage:**
+- **Main App:** Cash discount calculator with search and cart
+- **Barcode Scanner:** Click "Barcode Scanner" button in header
+
+## **SQL for getting CSV from CRE:**
+```sql
 -- Export inventory with proper brand descriptions from Departments table
-SELECT 
+SELECT
     UPPER(LTRIM(RTRIM(i.Dept_ID))) as Brand_Code,
     ISNULL(UPPER(LTRIM(RTRIM(d.Description))), '') as Brand_Name,
     LTRIM(RTRIM(i.ItemName + ISNULL(' ' + i.ItemName_Extra, ''))) as Name,
@@ -40,6 +78,5 @@ SELECT
 FROM Inventory i
 LEFT JOIN Departments d ON i.Dept_ID = d.Dept_ID AND i.Store_ID = d.Store_ID
 LEFT JOIN Inventory_SKUS s ON i.ItemNum = s.ItemNum AND i.Store_ID = s.Store_ID
-
 ORDER BY i.Dept_ID, i.ItemName;
 ```
