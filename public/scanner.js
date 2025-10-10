@@ -71,6 +71,11 @@ class BarcodeScannerApp {
             this.stopScannerBtn.classList.remove('hidden');
             this.scannerStatusText.textContent = 'Initializing camera...';
 
+            // Add scanning target overlay
+            const targetOverlay = document.createElement('div');
+            targetOverlay.className = 'scanner-target';
+            this.scannerContainer.appendChild(targetOverlay);
+
             // Initialize Quagga2
             await new Promise((resolve, reject) => {
                 Quagga.init({
@@ -83,6 +88,12 @@ class BarcodeScannerApp {
                             height: { min: 480, ideal: 720, max: 1080 },
                             facingMode: "environment",
                             aspectRatio: { min: 1, max: 2 }
+                        },
+                        area: { // Define scanning area (center 70% width, 40% height)
+                            top: "30%",
+                            right: "15%",
+                            left: "15%",
+                            bottom: "30%"
                         }
                     },
                     decoder: {

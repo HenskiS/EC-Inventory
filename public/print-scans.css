@@ -211,3 +211,39 @@
     size: landscape;
     margin: 10mm;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .header-actions button {
+        width: 100%;
+    }
+
+    .barcode-table {
+        font-size: 12px;
+    }
+
+    .barcode-table th,
+    .barcode-table td {
+        padding: 8px 4px;
+    }
+
+    .barcode-img {
+        max-width: 120px;
+    }
+}

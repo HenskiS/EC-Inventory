@@ -46,6 +46,58 @@
     height: 100%;
 }
 
+.scanner-target {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 40%;
+    border: 3px solid #48bb78;
+    border-radius: 8px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.scanner-target::before {
+    content: 'Position barcode here';
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #48bb78;
+    font-weight: 600;
+    font-size: 14px;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+}
+
+.scanner-target::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #48bb78 20%, #48bb78 80%, transparent);
+    animation: scanline 2s linear infinite;
+}
+
+@keyframes scanline {
+    0% {
+        top: 0%;
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
 .scanner-status {
     text-align: center;
     padding: 10px;
@@ -314,6 +366,26 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .header-actions button {
+        width: 100%;
+    }
+
     .scanner-section {
         grid-template-columns: 1fr;
     }
