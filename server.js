@@ -118,14 +118,47 @@ app.get('/api/search', (req, res) => {
     if (query.trim()) {
         const searchTerms = query.toLowerCase().split(/\s+/).filter(term => term.length > 0);
         if (searchTerms.length > 0) {
-            const termConditions = searchTerms.map(() =>
-                `(LOWER(brand_code) LIKE ? OR LOWER(brand_name) LIKE ? OR LOWER(name) LIKE ? OR LOWER(sku) LIKE ? OR LOWER(barcode) LIKE ?)`
-            );
+            const termConditions = searchTerms.map(() => {
+                // Check if term looks like a UPC (all digits)
+                const isUPC = /^\d+$/.test(searchTerms[0]);
+
+                if (isUPC) {
+                    // For UPC codes, match with and without leading zeros
+                    return `(
+                        LOWER(brand_code) LIKE ? OR
+                        LOWER(brand_name) LIKE ? OR
+                        LOWER(name) LIKE ? OR
+                        LOWER(sku) LIKE ? OR
+                        LOWER(barcode) LIKE ? OR
+                        CAST(barcode AS TEXT) = ? OR
+                        CAST(barcode AS TEXT) = ? OR
+                        CAST(barcode AS TEXT) = ?
+                    )`;
+                } else {
+                    return `(LOWER(brand_code) LIKE ? OR LOWER(brand_name) LIKE ? OR LOWER(name) LIKE ? OR LOWER(sku) LIKE ? OR LOWER(barcode) LIKE ?)`;
+                }
+            });
             conditions.push(`(${termConditions.join(' AND ')})`);
 
             searchTerms.forEach(term => {
                 const wildcardTerm = `%${term}%`;
-                params.push(wildcardTerm, wildcardTerm, wildcardTerm, wildcardTerm, wildcardTerm);
+                const isUPC = /^\d+$/.test(term);
+
+                if (isUPC) {
+                    // Strip leading zeros for comparison
+                    const strippedUPC = term.replace(/^0+/, '');
+                    // Add leading zero (common for UPC-A)
+                    const paddedUPC = '0' + strippedUPC;
+
+                    params.push(
+                        wildcardTerm, wildcardTerm, wildcardTerm, wildcardTerm, wildcardTerm,
+                        term,           // exact match
+                        strippedUPC,    // without leading zeros
+                        paddedUPC       // with one leading zero
+                    );
+                } else {
+                    params.push(wildcardTerm, wildcardTerm, wildcardTerm, wildcardTerm, wildcardTerm);
+                }
             });
         }
     }
