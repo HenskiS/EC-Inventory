@@ -20,7 +20,6 @@ Successfully created CSV export with these columns:
 - **Stock** (current inventory levels)
 
 ## **App Requirements Confirmed:**
-- Password protection for staff access
 - Real-time inventory search (brand, name, SKU, barcode)
 - Shopping cart with adjustable discount rate (default 40%)
 - Order completion and local storage

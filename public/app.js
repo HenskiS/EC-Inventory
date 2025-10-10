@@ -177,6 +177,9 @@ class InventoryApp {
         document.getElementById('new-order-btn').addEventListener('click', () => this.showSearch());
         document.getElementById('saved-orders-btn').addEventListener('click', () => this.showSavedOrders());
         document.getElementById('back-to-search-btn').addEventListener('click', () => this.showSearch());
+        document.getElementById('barcode-scanner-page-btn').addEventListener('click', () => {
+            window.location.href = 'scanner.html';
+        });
 
         // Cart actions
         document.getElementById('save-order-btn').addEventListener('click', () => this.saveOrder());

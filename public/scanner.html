@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner - EC Inventory</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="scanner.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Barcode Scanner</h1>
+            <div class="header-actions">
+                <button id="back-to-main-btn" class="btn-secondary">Back to Main</button>
+                <button id="export-csv-btn" class="btn-primary">Export CSV</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="scanner-section">
+                <div class="scanner-card">
+                    <h3>Scan Barcode</h3>
+                    <div id="scanner-container"></div>
+                    <div class="scanner-status">
+                        <span id="scanner-status-text">Ready to scan</span>
+                    </div>
+                    <div class="scanner-controls">
+                        <button id="start-scanner-btn" class="btn-primary">Start Scanner</button>
+                        <button id="stop-scanner-btn" class="btn-secondary hidden">Stop Scanner</button>
+                    </div>
+                </div>
+
+                <div class="manual-search-card">
+                    <h3>Manual Search</h3>
+                    <p class="help-text">If barcode not found, search and link product manually</p>
+                    <div class="search-box">
+                        <input type="text" id="manual-search-input" placeholder="Search product..." autocomplete="off">
+                    </div>
+                    <div id="manual-search-results" class="manual-search-results"></div>
+                    <div id="link-barcode-section" class="link-barcode-section hidden">
+                        <p>Link barcode <strong id="current-barcode"></strong> to product:</p>
+                        <div id="selected-product-info"></div>
+                        <button id="link-barcode-btn" class="btn-primary">Add to List</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scanned-items-section">
+                <h3>Scanned Items (<span id="scanned-count">0</span>)</h3>
+                <div class="items-summary">
+                    <span class="summary-item">Found: <strong id="found-count">0</strong></span>
+                    <span class="summary-item">Not Found: <strong id="not-found-count">0</strong></span>
+                </div>
+                <div id="scanned-items-list" class="scanned-items-list"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="notification" class="notification hidden"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <script src="scanner.js"></script>
+</body>
+</html>
