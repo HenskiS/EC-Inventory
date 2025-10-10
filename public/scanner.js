@@ -207,7 +207,9 @@ class BarcodeScannerApp {
                 this.showNotification(`Found: ${product.name}`);
                 this.scannerStatusText.textContent = `Found: ${product.name} - Ready for next scan`;
             } else {
-                // Not found - show both manual search and manual entry options
+                // Not found - pause scanner and show manual options
+                this.stopScanner();
+                this.pendingBarcode = barcode; // Store for manual linking
                 this.showNotification(`Barcode ${barcode} not found - link or enter manually`, 'error');
                 this.scannerStatusText.textContent = `Barcode ${barcode} not found - use options below`;
                 this.showManualLinkUI(barcode);
@@ -297,14 +299,19 @@ class BarcodeScannerApp {
     }
 
     linkBarcodeToProduct() {
-        if (!this.selectedProduct || !this.currentBarcode) {
+        if (!this.selectedProduct) {
             this.showNotification('Please select a product first', 'error');
             return;
         }
 
+        if (!this.pendingBarcode) {
+            this.showNotification('No barcode to link', 'error');
+            return;
+        }
+
         // Add to scanned items with the manually linked barcode
-        this.addScannedItem(this.currentBarcode, this.selectedProduct, false);
-        this.showNotification(`Linked barcode ${this.currentBarcode} to ${this.selectedProduct.name}`);
+        this.addScannedItem(this.pendingBarcode, this.selectedProduct, false);
+        this.showNotification(`Linked barcode ${this.pendingBarcode} to ${this.selectedProduct.name}`);
 
         // Clear manual linking UI
         this.linkBarcodeSection.classList.add('hidden');
@@ -314,11 +321,16 @@ class BarcodeScannerApp {
         this.manualBrand.value = '';
         this.manualName.value = '';
         this.selectedProduct = null;
+        this.pendingBarcode = null;
         this.scannerStatusText.textContent = 'Ready for next scan';
     }
 
     addManualEntry() {
-        const barcode = this.manualEntryBarcodeSpan.textContent;
+        if (!this.pendingBarcode) {
+            this.showNotification('No barcode to add', 'error');
+            return;
+        }
+
         const brand = this.manualBrand.value.trim();
         const name = this.manualName.value.trim();
 
@@ -338,8 +350,8 @@ class BarcodeScannerApp {
         };
 
         // Add to scanned items
-        this.addScannedItem(barcode, manualProduct, false);
-        this.showNotification(`Added manual entry for barcode ${barcode}`);
+        this.addScannedItem(this.pendingBarcode, manualProduct, false);
+        this.showNotification(`Added manual entry for barcode ${this.pendingBarcode}`);
 
         // Clear UI
         this.linkBarcodeSection.classList.add('hidden');
@@ -349,6 +361,7 @@ class BarcodeScannerApp {
         this.manualBrand.value = '';
         this.manualName.value = '';
         this.selectedProduct = null;
+        this.pendingBarcode = null;
         this.scannerStatusText.textContent = 'Ready for next scan';
     }
 
