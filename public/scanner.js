@@ -118,8 +118,8 @@ class BarcodeScannerApp {
             // Set up barcode detection with confidence filtering
             let lastDetectedCode = null;
             let detectionCount = 0;
-            const REQUIRED_DETECTIONS = 3;
-            const CONFIDENCE_THRESHOLD = 0.8;
+            const REQUIRED_DETECTIONS = 2;
+            const CONFIDENCE_THRESHOLD = 0.5;
 
             Quagga.onDetected((data) => {
                 if (!this.isScanning) return;
@@ -129,7 +129,7 @@ class BarcodeScannerApp {
 
                 console.log(`Detected: ${code}, Confidence: ${confidence.toFixed(2)}`);
 
-                // Require high confidence
+                // Require minimum confidence
                 if (confidence < CONFIDENCE_THRESHOLD) {
                     return;
                 }
