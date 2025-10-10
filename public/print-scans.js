@@ -42,7 +42,7 @@ async function loadScans() {
         );
 
         const skuEntries = allScans.filter(scan =>
-            scan.inventory_id && scan.sku
+            !scan.found && scan.sku
         );
 
         // Remove duplicates by barcode for each section
