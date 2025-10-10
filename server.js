@@ -60,6 +60,32 @@ function initializeDatabase() {
             console.log('Orders table ready');
         }
     });
+
+    // Create barcode_scans table for scanner persistence
+    db.run(`
+        CREATE TABLE IF NOT EXISTS barcode_scans (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            barcode TEXT NOT NULL,
+            found BOOLEAN NOT NULL,
+            inventory_id INTEGER,
+            manual_brand TEXT,
+            manual_name TEXT,
+            sku TEXT,
+            brand_name TEXT,
+            brand_code TEXT,
+            price REAL,
+            stock INTEGER,
+            name TEXT,
+            scanned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (inventory_id) REFERENCES inventory(id)
+        )
+    `, (err) => {
+        if (err) {
+            console.error('Error creating barcode_scans table:', err.message);
+        } else {
+            console.log('Barcode scans table ready');
+        }
+    });
 }
 
 // Get unique brands for filter dropdown
@@ -214,6 +240,71 @@ app.put('/api/orders/:id/complete', (req, res) => {
 // Delete order
 app.delete('/api/orders/:id', (req, res) => {
     const sql = 'DELETE FROM orders WHERE id = ?';
+
+    db.run(sql, [req.params.id], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json({ success: true });
+        }
+    });
+});
+
+// Barcode Scanner Endpoints
+
+// Save a scanned barcode
+app.post('/api/barcode-scans', (req, res) => {
+    const { barcode, found, inventory_id, manual_brand, manual_name, sku, brand_name, brand_code, price, stock, name } = req.body;
+
+    const sql = `
+        INSERT INTO barcode_scans
+        (barcode, found, inventory_id, manual_brand, manual_name, sku, brand_name, brand_code, price, stock, name)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.run(sql, [barcode, found ? 1 : 0, inventory_id, manual_brand, manual_name, sku, brand_name, brand_code, price, stock, name], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json({ id: this.lastID, success: true });
+        }
+    });
+});
+
+// Get all scanned barcodes
+app.get('/api/barcode-scans', (req, res) => {
+    const sql = 'SELECT * FROM barcode_scans ORDER BY scanned_at DESC';
+
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            // Convert found from 0/1 to boolean
+            const scans = rows.map(row => ({
+                ...row,
+                found: row.found === 1
+            }));
+            res.json(scans);
+        }
+    });
+});
+
+// Clear all scanned barcodes
+app.delete('/api/barcode-scans', (req, res) => {
+    const sql = 'DELETE FROM barcode_scans';
+
+    db.run(sql, [], function(err) {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json({ success: true, deleted: this.changes });
+        }
+    });
+});
+
+// Delete a single scanned barcode
+app.delete('/api/barcode-scans/:id', (req, res) => {
+    const sql = 'DELETE FROM barcode_scans WHERE id = ?';
 
     db.run(sql, [req.params.id], function(err) {
         if (err) {

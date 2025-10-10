@@ -8,7 +8,7 @@ class BarcodeScannerApp {
 
         this.initializeElements();
         this.bindEvents();
-        this.updateDisplay();
+        this.loadScannedItems();
     }
 
     initializeElements() {
@@ -36,6 +36,7 @@ class BarcodeScannerApp {
         this.notFoundCount = document.getElementById('not-found-count');
 
         this.exportCsvBtn = document.getElementById('export-csv-btn');
+        this.clearAllBtn = document.getElementById('clear-all-btn');
         this.backToMainBtn = document.getElementById('back-to-main-btn');
         this.notification = document.getElementById('notification');
     }
@@ -47,6 +48,7 @@ class BarcodeScannerApp {
         this.linkBarcodeBtn.addEventListener('click', () => this.linkBarcodeToProduct());
         this.addManualEntryBtn.addEventListener('click', () => this.addManualEntry());
         this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
+        this.clearAllBtn.addEventListener('click', () => this.clearAllScans());
         this.backToMainBtn.addEventListener('click', () => {
             window.location.href = 'index.html';
         });
@@ -350,7 +352,7 @@ class BarcodeScannerApp {
         this.scannerStatusText.textContent = 'Ready for next scan';
     }
 
-    addScannedItem(barcode, product, found) {
+    async addScannedItem(barcode, product, found) {
         // Check if already scanned
         const existing = this.scannedItems.find(item => item.barcode === barcode);
         if (existing) {
@@ -365,8 +367,64 @@ class BarcodeScannerApp {
             ...product
         };
 
+        // Save to database
+        try {
+            const response = await fetch('/api/barcode-scans', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    barcode: barcode,
+                    found: found,
+                    inventory_id: product.id || null,
+                    manual_brand: !found && !product.id ? product.brand_name : null,
+                    manual_name: !found && !product.id ? product.name : null,
+                    sku: product.sku || null,
+                    brand_name: product.brand_name || null,
+                    brand_code: product.brand_code || null,
+                    price: product.price || null,
+                    stock: product.stock || null,
+                    name: product.name || null
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                scannedItem.id = result.id; // Store the database ID
+            }
+        } catch (error) {
+            console.error('Error saving scan to database:', error);
+            // Continue anyway - we'll still show it in the UI
+        }
+
         this.scannedItems.unshift(scannedItem); // Add to beginning of array
         this.updateDisplay();
+    }
+
+    async loadScannedItems() {
+        try {
+            const response = await fetch('/api/barcode-scans');
+            if (response.ok) {
+                const scans = await response.json();
+                this.scannedItems = scans.map(scan => ({
+                    id: scan.id,
+                    barcode: scan.barcode,
+                    found: scan.found,
+                    timestamp: scan.scanned_at,
+                    sku: scan.sku,
+                    brand_name: scan.manual_brand || scan.brand_name,
+                    brand_code: scan.brand_code,
+                    price: scan.price,
+                    stock: scan.stock,
+                    name: scan.manual_name || scan.name
+                }));
+                this.updateDisplay();
+            }
+        } catch (error) {
+            console.error('Error loading scanned items:', error);
+            this.updateDisplay();
+        }
     }
 
     updateDisplay() {
@@ -407,8 +465,21 @@ class BarcodeScannerApp {
         `).join('');
     }
 
-    removeScannedItem(index) {
+    async removeScannedItem(index) {
         if (confirm('Remove this item from the list?')) {
+            const item = this.scannedItems[index];
+
+            // Delete from database if it has an ID
+            if (item.id) {
+                try {
+                    await fetch(`/api/barcode-scans/${item.id}`, {
+                        method: 'DELETE'
+                    });
+                } catch (error) {
+                    console.error('Error deleting scan from database:', error);
+                }
+            }
+
             this.scannedItems.splice(index, 1);
             this.updateDisplay();
             this.showNotification('Item removed');
@@ -464,6 +535,34 @@ class BarcodeScannerApp {
         document.body.removeChild(link);
 
         this.showNotification(`Exported ${this.scannedItems.length} items to CSV`);
+    }
+
+    async clearAllScans() {
+        if (this.scannedItems.length === 0) {
+            this.showNotification('No scans to clear', 'error');
+            return;
+        }
+
+        if (!confirm(`Clear all ${this.scannedItems.length} scanned items? This cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/barcode-scans', {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                this.scannedItems = [];
+                this.updateDisplay();
+                this.showNotification('All scans cleared');
+            } else {
+                throw new Error('Failed to clear scans');
+            }
+        } catch (error) {
+            console.error('Error clearing scans:', error);
+            this.showNotification('Error clearing scans', 'error');
+        }
     }
 
     showNotification(message, type = 'success') {
