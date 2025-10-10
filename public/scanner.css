@@ -124,6 +124,62 @@
     margin-bottom: 5px;
 }
 
+.manual-entry-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.manual-entry-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.manual-entry-divider span {
+    position: relative;
+    background: white;
+    padding: 0 15px;
+    color: #a0aec0;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.manual-entry-section {
+    padding: 15px;
+    background: #e6f7ff;
+    border: 2px solid #4299e1;
+    border-radius: 4px;
+}
+
+.manual-entry-section p {
+    margin: 0 0 15px 0;
+    color: #2c5282;
+}
+
+.manual-entry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.manual-input {
+    padding: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+.manual-input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
 .scanned-items-section {
     background: white;
     border-radius: 8px;

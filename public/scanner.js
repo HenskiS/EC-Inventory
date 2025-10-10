@@ -24,6 +24,12 @@ class BarcodeScannerApp {
         this.selectedProductInfo = document.getElementById('selected-product-info');
         this.linkBarcodeBtn = document.getElementById('link-barcode-btn');
 
+        this.manualEntrySection = document.getElementById('manual-entry-section');
+        this.manualEntryBarcodeSpan = document.getElementById('manual-entry-barcode');
+        this.manualBrand = document.getElementById('manual-brand');
+        this.manualName = document.getElementById('manual-name');
+        this.addManualEntryBtn = document.getElementById('add-manual-entry-btn');
+
         this.scannedItemsList = document.getElementById('scanned-items-list');
         this.scannedCount = document.getElementById('scanned-count');
         this.foundCount = document.getElementById('found-count');
@@ -39,6 +45,7 @@ class BarcodeScannerApp {
         this.stopScannerBtn.addEventListener('click', () => this.stopScanner());
         this.manualSearchInput.addEventListener('input', (e) => this.handleManualSearch(e.target.value));
         this.linkBarcodeBtn.addEventListener('click', () => this.linkBarcodeToProduct());
+        this.addManualEntryBtn.addEventListener('click', () => this.addManualEntry());
         this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
         this.backToMainBtn.addEventListener('click', () => {
             window.location.href = 'index.html';
@@ -198,10 +205,11 @@ class BarcodeScannerApp {
                 this.showNotification(`Found: ${product.name}`);
                 this.scannerStatusText.textContent = `Found: ${product.name} - Ready for next scan`;
             } else {
-                // Not found - need manual linking
-                this.showNotification(`Barcode ${barcode} not found - please search manually`, 'error');
-                this.scannerStatusText.textContent = `Barcode ${barcode} not found - search manually below`;
+                // Not found - show both manual search and manual entry options
+                this.showNotification(`Barcode ${barcode} not found - link or enter manually`, 'error');
+                this.scannerStatusText.textContent = `Barcode ${barcode} not found - use options below`;
                 this.showManualLinkUI(barcode);
+                this.showManualEntryUI(barcode);
             }
         } catch (error) {
             console.error('Error looking up barcode:', error);
@@ -219,6 +227,11 @@ class BarcodeScannerApp {
         this.currentBarcodeSpan.textContent = barcode;
         this.linkBarcodeSection.classList.remove('hidden');
         this.manualSearchInput.focus();
+    }
+
+    showManualEntryUI(barcode) {
+        this.manualEntryBarcodeSpan.textContent = barcode;
+        this.manualEntrySection.classList.remove('hidden');
     }
 
     handleManualSearch(query) {
@@ -293,8 +306,46 @@ class BarcodeScannerApp {
 
         // Clear manual linking UI
         this.linkBarcodeSection.classList.add('hidden');
+        this.manualEntrySection.classList.add('hidden');
         this.manualSearchInput.value = '';
         this.manualSearchResults.innerHTML = '';
+        this.manualBrand.value = '';
+        this.manualName.value = '';
+        this.selectedProduct = null;
+        this.scannerStatusText.textContent = 'Ready for next scan';
+    }
+
+    addManualEntry() {
+        const barcode = this.manualEntryBarcodeSpan.textContent;
+        const brand = this.manualBrand.value.trim();
+        const name = this.manualName.value.trim();
+
+        if (!brand || !name) {
+            this.showNotification('Please enter both brand and product name', 'error');
+            return;
+        }
+
+        // Create a product object with manual entry data
+        const manualProduct = {
+            name: name,
+            brand_name: brand,
+            brand_code: '',
+            sku: '',
+            price: null,
+            stock: null
+        };
+
+        // Add to scanned items
+        this.addScannedItem(barcode, manualProduct, false);
+        this.showNotification(`Added manual entry for barcode ${barcode}`);
+
+        // Clear UI
+        this.linkBarcodeSection.classList.add('hidden');
+        this.manualEntrySection.classList.add('hidden');
+        this.manualSearchInput.value = '';
+        this.manualSearchResults.innerHTML = '';
+        this.manualBrand.value = '';
+        this.manualName.value = '';
         this.selectedProduct = null;
         this.scannerStatusText.textContent = 'Ready for next scan';
     }
