@@ -26,6 +26,7 @@ Mobile web app for iPad/desktop to manage cash discount calculations and barcode
 - Manual product search and barcode linking
 - Manual entry for products not in inventory (brand + name/size)
 - Running list of scanned items (found/not found)
+- Print-ready barcode page for POS updates
 - CSV export with full product data
 - Database persistence (survives page refresh)
 - Clear all functionality
@@ -60,9 +61,32 @@ Persistent barcode scanner data
 3. Start server: `npm start`
 4. Open browser: `http://localhost:3001`
 
+## **Deployment Notes:**
+- Database resets on each deployment (not tracked in git)
+- Before deploying: Download scan data from `/api/barcode-scans` to preserve it
+- After deploying: Re-import inventory CSV and scans using `import-scans.js`
+
 ## **Usage:**
 - **Main App:** Cash discount calculator with search and cart
 - **Barcode Scanner:** Click "Barcode Scanner" button in header
+- **Print Scans:** Click "Print Scans" from scanner page to view/print barcode updates
+
+## **Updating CRE POS Barcodes:**
+
+### Method 1: Web Interface (Recommended)
+1. Scan products using the barcode scanner
+2. Click "Print Scans" button to view print-ready page
+3. Review two sections:
+   - **Manual Entries:** Products not in inventory database
+   - **SKU Entries:** Products needing barcode updates in POS
+4. Print the page (displays SKU, barcode number, and barcode image)
+5. Use the SKUs to locate products in POS and scan/enter new barcodes
+
+### Method 2: Manual CSV Export
+1. Scan barcodes
+2. Navigate to [/api/barcode-scans](https://ec-inventory-wx8ed.ondigitalocean.app/api/barcode-scans) and download JSON into /data folder
+3. Run `node import-scans.js` to import scans into local database
+4. Open print-scans.html in browser to view formatted list
 
 ## **SQL for getting CSV from CRE:**
 ```sql

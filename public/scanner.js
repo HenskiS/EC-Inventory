@@ -35,6 +35,7 @@ class BarcodeScannerApp {
         this.foundCount = document.getElementById('found-count');
         this.notFoundCount = document.getElementById('not-found-count');
 
+        this.printScansBtn = document.getElementById('print-scans-btn');
         this.exportCsvBtn = document.getElementById('export-csv-btn');
         this.clearAllBtn = document.getElementById('clear-all-btn');
         this.backToMainBtn = document.getElementById('back-to-main-btn');
@@ -47,6 +48,9 @@ class BarcodeScannerApp {
         this.manualSearchInput.addEventListener('input', (e) => this.handleManualSearch(e.target.value));
         this.linkBarcodeBtn.addEventListener('click', () => this.linkBarcodeToProduct());
         this.addManualEntryBtn.addEventListener('click', () => this.addManualEntry());
+        this.printScansBtn.addEventListener('click', () => {
+            window.location.href = 'print-scans.html';
+        });
         this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
         this.clearAllBtn.addEventListener('click', () => this.clearAllScans());
         this.backToMainBtn.addEventListener('click', () => {

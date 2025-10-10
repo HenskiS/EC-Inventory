@@ -12,7 +12,11 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Initialize SQLite database
-const db = new sqlite3.Database('inventory.db', (err) => {
+// Use DB_PATH environment variable for persistent storage, default to local directory
+const dbPath = process.env.DB_PATH || 'inventory.db';
+console.log(`Using database path: ${dbPath}`);
+
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
     } else {

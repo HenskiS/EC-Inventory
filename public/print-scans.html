@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Barcode Scans - EC Inventory</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="print-scans.css">
+</head>
+<body>
+    <div class="container">
+        <header class="no-print">
+            <h1>Print Barcode Scans</h1>
+            <div class="header-actions">
+                <button id="back-to-scanner-btn" class="btn-secondary">Back to Scanner</button>
+                <button id="print-btn" class="btn-primary">Print</button>
+            </div>
+        </header>
+
+        <main>
+            <div id="loading" class="loading">Loading scans...</div>
+
+            <!-- Manual Entries Section -->
+            <div id="manual-entries-section" class="print-section hidden">
+                <h2>Manual Entries (<span id="manual-count">0</span>)</h2>
+                <p class="section-description no-print">Products not found in inventory database</p>
+                <table class="barcode-table">
+                    <thead>
+                        <tr>
+                            <th>Barcode</th>
+                            <th>Barcode Image</th>
+                            <th>Brand</th>
+                            <th>Product Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manual-entries-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SKU Entries Section -->
+            <div id="sku-entries-section" class="print-section hidden">
+                <h2>SKU Entries (<span id="sku-count">0</span>)</h2>
+                <p class="section-description no-print">Products found in inventory with different/missing barcodes</p>
+                <table class="barcode-table">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Barcode</th>
+                            <th>Barcode Image</th>
+                            <th>Brand</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sku-entries-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="no-data" class="no-data hidden">
+                <p>No unfound or manual entries to display.</p>
+                <button id="back-to-scanner-btn-2" class="btn-secondary">Back to Scanner</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="print-scans.js"></script>
+</body>
+</html>
