@@ -373,11 +373,12 @@ class BarcodeScannerApp {
             return;
         }
 
+        // Create item with product data, but preserve the scanned barcode
         const scannedItem = {
-            barcode: barcode,
+            ...product,
+            barcode: barcode, // Override with scanned barcode (product.barcode might be blank)
             found: found,
-            timestamp: new Date().toISOString(),
-            ...product
+            timestamp: new Date().toISOString()
         };
 
         // Save to database
